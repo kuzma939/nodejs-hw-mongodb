@@ -68,11 +68,6 @@ const setupServer = () => {
     }
   });
   const PORT = process.env.PORT || 3000;
-  // Port Validation
-  if (isNaN(PORT) || PORT <= 0 || PORT >= 65536) {
-    console.error('Invalid PORT number. It must be between 1 and 65535.');
-    process.exit(1);
-  }
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
