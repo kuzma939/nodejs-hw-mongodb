@@ -22,7 +22,7 @@ export const getAllContacts = async () => {
   try {
     // Використовуємо find() для Mongoose
     const contacts = await ContactsCollection.find();
-    console.log('Contacts:', contacts);
+    
     return contacts;
   } catch (error) {
     console.error('Error fetching contacts:', error.message);
