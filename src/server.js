@@ -39,7 +39,6 @@ const setupServer = () => {
 
   app.get('/contacts/:id', async (req, res) => {
     const { id } = req.params;
-    console.log(`Received ID: ${id}`);
     if (!ObjectId.isValid(id)) {
       console.error(`Invalid ObjectId: ${id}`);
       return res.status(400).json({
@@ -52,7 +51,6 @@ const setupServer = () => {
       const contact = await getContactsById(id);
       if (!contact) {
         return res.status(404).json({
-          status: 404,
           message: 'Contact not found',
         });
       }
