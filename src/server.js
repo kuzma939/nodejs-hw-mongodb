@@ -2,12 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
 import dotenv from 'dotenv';
-import { getAllContacts, getContactsById } from './services/contacts.js';
-import { ObjectId } from 'mongodb';
-
+import contactsRouter from './routers/contacts.js'
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 dotenv.config();
-
-
+const PORT = process.env.PORT || 3000;
+ 
 const setupServer = () => {
   const app = express();
   app.use(cors());
@@ -19,56 +19,9 @@ const setupServer = () => {
     }),
   );
   app.use(express.json());
-
-  app.get('/contacts', async (req, res) => {
-    try {
-      const contacts = await getAllContacts();
-      res.json({
-        status: 200,
-        message: 'Successfully found contacts!',
-        data: contacts,
-      });
-    } catch (error) {
-      console.error('Error fetching contacts:', error.message);
-      res.status(500).json({
-        status: 500,
-        message: 'Internal server error',
-      });
-    }
-  });
-
-  app.get('/contacts/:id', async (req, res) => {
-    const { id } = req.params;
-    if (!ObjectId.isValid(id)) {
-      console.error(`Invalid ObjectId: ${id}`);
-      return res.status(400).json({
-        status: 400,
-        message: 'Invalid contact ID format',
-      });
-    }
-
-    try {
-      const contact = await getContactsById(id);
-      if (!contact) {
-        return res.status(404).json({
-          message: 'Contact not found',
-        });
-      }
-      res.json({
-        status: 200,
-        message: `Successfully found contact with id ${id}!`,
-        data: contact,
-      });
-    } catch (error) {
-      console.error(`Error fetching contact with id ${id}:`, error.message);
-      res.status(500).json({
-        status: 500,
-        message: 'Internal server error',
-      });
-    }
-  });
-  const PORT = process.env.PORT || 3000;
-
+app.use(contactsRouter);
+app.use('*', notFoundHandler);
+app.use(errorHandler);
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
