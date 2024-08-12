@@ -1,3 +1,4 @@
+import createHttpError from 'http-errors';
 import { getAllContacts, 
     getContactsById,
      createContacts, 
@@ -20,7 +21,7 @@ import { getAllContacts,
     // eslint-disable-next-line no-unused-vars
     export const getContactsByIdController = async (reg, res) => {
       const contact = await getContactsById(contactsId);
-        const { contactsId } = req.params;
+        const { contactsId } = reg.params;
         if (!contact) {
             throw createHttpError(404, 'Contact no found');
           }
