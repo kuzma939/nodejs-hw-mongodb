@@ -20,13 +20,7 @@ export const createContacts = async (payload) => {
   const contact = await ContactsCollection.create(payload);
   return contact;
 };
-export const deleteContacts = async (contactsId) => {
-  const contact = await ContactsCollection.findOneAndDelete({
-    _id: contactsId,
-  });
 
-  return contact;
-}
 export const updateContact = async (contactsId, payload, options = {}) => {
   const opaResult = await ContactsCollection.findOneAndUpdate(
     { _id: contactsId },
@@ -44,3 +38,10 @@ export const updateContact = async (contactsId, payload, options = {}) => {
     isNew: Boolean(opaResult?.lastErrorObject?.upserted),
   };
 };
+export const deleteContacts = async (contactsId) => {
+  const contact = await ContactsCollection.findOneAndDelete({
+    _id: contactsId,
+  });
+
+  return contact;
+}
