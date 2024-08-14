@@ -1,14 +1,9 @@
 import { ContactsCollection } from '../db/models/contacts.js';
 
 export const getAllContacts = async () => {
-  try {
-    const contacts = await ContactsCollection.find();
-    console.log('Contacts:', contacts); 
-    return contacts;
-  } catch (error) {
-    console.error('Error fetching contacts:', error);
-    throw error; 
-  }
+  const contacts = await ContactsCollection.find();
+  console.log('Contacts:', contacts); 
+  return contacts;
 };
 
 export const getContactsById = async (id) => {
@@ -21,9 +16,9 @@ export const createContacts = async (payload) => {
   return contact;
 };
 
-export const updateContact = async (contactsId, payload, options = {}) => {
+export const updateContact = async (id, payload, options = {}) => {
   const opaResult = await ContactsCollection.findOneAndUpdate(
-    { _id: contactsId },
+    { _id: id },
     payload,
     {
       new: true,
@@ -31,6 +26,7 @@ export const updateContact = async (contactsId, payload, options = {}) => {
       ...options,
     },
   );
+  
   if (!opaResult || !opaResult.value) return null;
 
   return {
@@ -38,10 +34,11 @@ export const updateContact = async (contactsId, payload, options = {}) => {
     isNew: Boolean(opaResult?.lastErrorObject?.upserted),
   };
 };
-export const deleteContacts = async (contactsId) => {
+
+export const deleteContacts = async (id) => {
   const contact = await ContactsCollection.findOneAndDelete({
-    _id: contactsId,
+    _id: id,
   });
 
   return contact;
-}
+};
