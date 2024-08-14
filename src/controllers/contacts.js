@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import createHttpError from 'http-errors';
 import { getAllContacts, getContactsById, createContacts, deleteContacts, updateContact } from '../services/contacts.js';
 // eslint-disable-next-line no-unused-vars
@@ -13,19 +14,26 @@ export const getContactsAllController = async (req, res, next) => {
 };
 // eslint-disable-next-line no-unused-vars
 export const getContactsByIdController = async (req, res, next) => {
+  try {
   const { id } = req.params;
-  
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(createHttpError(400, 'Invalid contact ID'));
+  }  
     const contact = await getContactsById(id);
     if (!contact) {
       throw createHttpError(404, 'Contact no found');
 
     }
+  
     res.json({
       status: 200,
       message: `Successfully found contact with id ${id}!`,
       data: contact,
     });
- 
+  } catch (error) {
+    next(error);
+    
+  }
 };
 // eslint-disable-next-line no-unused-vars
 export const createContactsController = async (req, res, next) => {
