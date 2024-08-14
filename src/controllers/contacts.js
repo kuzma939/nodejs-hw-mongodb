@@ -22,9 +22,7 @@ export const getContactsByIdController = async (req, res, next) => {
     const contact = await getContactsById(id);
     if (!contact) {
       throw createHttpError(404, 'Contact no found');
-
     }
-  
     res.json({
       status: 200,
       message: `Successfully found contact with id ${id}!`,
@@ -37,7 +35,6 @@ export const getContactsByIdController = async (req, res, next) => {
 };
 // eslint-disable-next-line no-unused-vars
 export const createContactsController = async (req, res, next) => {
-  
     const contact = await createContacts(req.body);
     res.status(201).json({
       status: 201,
