@@ -14,7 +14,7 @@ export const getContactsAllController = async (req, res, next) => {
 // eslint-disable-next-line no-unused-vars
 export const getContactsByIdController = async (req, res, next) => {
   const { id } = req.params;
-  try {
+  
     const contact = await getContactsById(id);
     if (!contact) {
       throw createHttpError(404, 'Contact not found');
@@ -24,9 +24,7 @@ export const getContactsByIdController = async (req, res, next) => {
       message: `Successfully found contact with id ${id}!`,
       data: contact,
     });
-  } catch (err) {
-    next(err); // Надсилаємо помилку до обробника помилок
-  }
+ 
 };
 // eslint-disable-next-line no-unused-vars
 export const createContactsController = async (req, res, next) => {
