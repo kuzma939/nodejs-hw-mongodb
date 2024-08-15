@@ -1,10 +1,23 @@
 import mongoose from 'mongoose';
 import createHttpError from 'http-errors';
 import { getAllContacts, getContactsById, createContacts, deleteContacts, updateContact } from '../services/contacts.js';
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+import { parseSortParams } from '../utils/parseSortParams.js'
+import { parseFilterParams } from '../utils/parseFilterParams.js';
 // eslint-disable-next-line no-unused-vars
 export const getContactsAllController = async (req, res, next) => {
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query);
+  const filter = parseFilterParams(req.query);
+    const contacts = await getAllContacts({
+      page,
+  perPage,
+  sortOrder,
+  sortBy,
+  filter,
   
-    const contacts = await getAllContacts();
+    });
+    
     res.json({
       status: 200,
       message: 'Successfully found contacts!',
