@@ -8,34 +8,21 @@ export const getAllContacts = async ({
   sortBy = '_id',
   filter = {},
 }) => {
+  try {
   const limit = perPage;
   const skip = (page - 1) * perPage;
   const contactsQuery = ContactsCollection.find();
   
    // Фільтрування за типом
-   if (filter.type) {
+   if (filter.contactType) {
     contactsQuery.where('contactType').equals(filter.type);
   }
 
   // Фільтрування за isFavourite
   if (typeof filter.isFavourite !== 'undefined') {
-    contactsQuery.where('isFavourite').equals(filter.isFavourite);
+    contactsQuery.where('isFavorite').equals(filter.isFavourite);
   }
-  if (filter.gender) {
-    contactsQuery.where('gender').equals(filter.gender);
-  }
-  if (filter.maxAge) {
-    contactsQuery.where('age').lte(filter.maxAge);
-  }
-  if (filter.minAge) {
-    contactsQuery.where('age').gte(filter.minAge);
-  }
-  if (filter.maxAvgMark) {
-    contactsQuery.where('avgMark').lte(filter.maxAvgMark);
-  }
-  if (filter.minAvgMark) {
-    contactsQuery.where('avgMark').gte(filter.minAvgMark);
-  }
+  
   const [contactsCount, contact] = await Promise.all([
     ContactsCollection.find().merge(contactsQuery).countDocuments(),
     contactsQuery
@@ -46,13 +33,18 @@ export const getAllContacts = async ({
   ]);
   
   const paginationData = calculatePaginationData(contactsCount, perPage, page);
-
+  console.log('Contacts:', contact); 
   return {
     data: contact,
     ...paginationData,
-  };
+  }
+  }
+  
+ catch (error) {
+  console.error('Error fetching contacts:', error);
+  throw error; 
 };
- 
+};
 
 export const getContactsById = async (id) => {
   const contact = await ContactsCollection.findOne({ _id: id });
