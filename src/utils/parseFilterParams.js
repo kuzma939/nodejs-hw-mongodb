@@ -18,24 +18,13 @@ const parseGender = (gender) => {
   
     return parsedNumber;
   };
-  
   export const parseFilterParams = (query) => {
-    const { gender, maxAge, minAge, maxAvgMark, minAvgMark, type, isFavourite } = query;
+    const { contactType, isFavourite } = query;
   
-    const parsedGender = parseGender(gender);
-    const parsedMaxAge = parseNumber(maxAge);
-    const parsedMinAge = parseNumber(minAge);
-    const parsedMaxAvgMark = parseNumber(maxAvgMark);
-    const parsedMinAvgMark = parseNumber(minAvgMark);
-  
+    const parsedContactType = parseGender(contactType);
+    const parsedIsFavourite = parseNumber(isFavourite);
     return {
-      gender: parsedGender,
-      maxAge: parsedMaxAge,
-      minAge: parsedMinAge,
-      maxAvgMark: parsedMaxAvgMark,
-      minAvgMark: parsedMinAvgMark,
-      type: type, 
-      isFavourite: typeof isFavourite !== 'undefined' ? isFavourite === 'true' : undefined, // Перетворення в boolean
+      contactType: parsedContactType,
+      isFavourite: parsedIsFavourite,
     };
   };
-  
