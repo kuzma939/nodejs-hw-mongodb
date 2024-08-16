@@ -72,7 +72,6 @@ export const updateContact = async (id, payload, options = {}) => {
     isNew: Boolean(options?.upsert),
   };
 };
-
 export const deleteContacts = async (id) => {
   const contact = await ContactsCollection.findOneAndDelete({
     _id: id,
