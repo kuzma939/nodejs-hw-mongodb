@@ -4,7 +4,7 @@ import { getAllContacts, getContactsById, createContacts, deleteContacts, update
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js'
 import { parseFilterParams } from '../utils/parseFilterParams.js';
-import { contactSchema, contactUpdateSchema } from '../schemas/contactSchema.js';
+import { contactSchema } from '../schemas/contactSchema.js';
 // eslint-disable-next-line no-unused-vars
 export const getContactsAllController = async (req, res, next) => {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -65,12 +65,6 @@ export const createContactsController = async (req, res, next) => {
 // eslint-disable-next-line no-unused-vars
 export const patchContactController = async (req, res, next) => {
   const { id } = req.params;
- // Валідація тіла запиту
- const { error } = contactUpdateSchema.validate(req.body);
- if (error) {
-   throw createHttpError(400, error.details[0].message);
- }
-
     const result = await updateContact(id, req.body);
     if (!result) {
       next(createHttpError(404, 'Contacts not found'));
