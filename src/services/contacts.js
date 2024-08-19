@@ -58,7 +58,7 @@ export const createContacts = async (payload) => {
 
 export const updateContact = async (id, payload, options = {}) => {
   const opaResult = await ContactsCollection.findOneAndUpdate(
-    id,
+    { _id: id },
     { $set: payload },
     { new: true, ...options }
   );
