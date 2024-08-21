@@ -5,7 +5,8 @@ const usersSchema = new Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-   
+    accessTokenValidUntil: { type: Date, required: true },
+    refreshTokenValidUntil: { type: Date, required: true },
   },
   { timestamps: true, versionKey: false },
 );
