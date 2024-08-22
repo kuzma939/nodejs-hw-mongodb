@@ -16,7 +16,7 @@ export const getContactsAllController = async (req, res, next) => {
   sortOrder,
   sortBy,
   filter,
-  
+  userId: req.user._id,
     });
     
     res.json({
@@ -30,10 +30,11 @@ export const getContactsAllController = async (req, res, next) => {
 export const getContactsByIdController = async (req, res, next) => {
   try {
   const { id } = req.params;
+  const { userId } = req.user._id;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return next(createHttpError(400, 'Invalid contact ID'));
   }  
-    const contact = await getContactsById(id);
+    const contact = await getContactsById(id, userId);
     if (!contact) {
       throw createHttpError(404, 'Contact no found');
     }
@@ -49,12 +50,13 @@ export const getContactsByIdController = async (req, res, next) => {
 };
 // eslint-disable-next-line no-unused-vars
 export const createContactsController = async (req, res, next) => {
+  const userId = req.user._id;
    // Валідація тіла запиту
    const { error } = contactSchema.validate(req.body);
    if (error) {
      throw createHttpError(400, error.details[0].message);
    }
-    const contact = await createContacts(req.body);
+    const contact = await createContacts(req.body, userId);
     res.status(201).json({
       status: 201,
       message: 'Successfully created a contact!',
@@ -64,8 +66,9 @@ export const createContactsController = async (req, res, next) => {
 };
 // eslint-disable-next-line no-unused-vars
 export const patchContactController = async (req, res, next) => {
+  const userId = req.user._id;
   const { id } = req.params;
-    const result = await updateContact(id, req.body);
+    const result = await updateContact(id, req.body, userId);
     if (!result) {
       next(createHttpError(404, 'Contacts not found'));
       return;
@@ -81,8 +84,8 @@ export const patchContactController = async (req, res, next) => {
 // eslint-disable-next-line no-unused-vars
 export const deleteContactsIdController = async (req, res, next) => {
   const { id } = req.params;
-  
-    const contact = await deleteContacts(id);
+  const userId = req.user._id;
+    const contact = await deleteContacts(id, userId);
     if (!contact) {
       next(createHttpError(404, 'Contacts not found'));
       return;
