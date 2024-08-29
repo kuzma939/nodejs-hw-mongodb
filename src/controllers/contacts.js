@@ -5,6 +5,9 @@ import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js'
 import { parseFilterParams } from '../utils/parseFilterParams.js';
 import { contactSchema } from '../schemas/contactSchema.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+import { env } from '../utils/env.js';
 // eslint-disable-next-line no-unused-vars
 export const getContactsAllController = async (req, res, next) => {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -52,6 +55,17 @@ export const getContactsByIdController = async (req, res, next) => {
 // eslint-disable-next-line no-unused-vars
 export const createContactsController = async (req, res, next) => {
   const userId = req.user._id;
+  const photo = req.file;
+  const payload = { ...req.body, userId };
+  let photoUrl;
+  if (photo) {
+    if (env('ENABLE_CLOUDINARY') === 'true') {
+      photoUrl = await saveFileToCloudinary(photo);
+    } else {
+      photoUrl = await saveFileToUploadDir(photo);
+    }
+    payload.photo = photoUrl;
+  }
    // Валідація тіла запиту
    const { error } = contactSchema.validate(req.body);
    if (error) {
@@ -69,7 +83,17 @@ export const createContactsController = async (req, res, next) => {
 export const patchContactController = async (req, res, next) => {
   const userId = req.user._id;
   const { id } = req.params;
-    const result = await updateContact(id, req.body, userId);
+  const photo = req.file;
+  let photoUrl;
+
+  if (photo) {
+    if (env('ENABLE_CLOUDINARY') === 'true') {
+      photoUrl = await saveFileToCloudinary(photo);
+    } else {
+      photoUrl = await saveFileToUploadDir(photo);
+    }
+  }
+    const result = await updateContact(id, req.body, userId, {photo: photoUrl} );
     if (!result) {
       next(createHttpError(404, 'Contacts not found'));
       return;
