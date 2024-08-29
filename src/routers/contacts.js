@@ -11,14 +11,14 @@ import { validateBody } from '../middlewares/validateBody.js';
 import { contactSchema } from '../schemas/contactSchema.js';
 import { isValidId } from '../middlewares/isValidId.js';
 import { authenticate } from '../middlewares/authenticate.js';
-
+import { upload } from '../middlewares/multer.js';
 const router = Router();
 router.use(authenticate);
 
 router.get('/', ctrlWrapper(getContactsAllController));
 router.get('/:id', isValidId, ctrlWrapper(getContactsByIdController)); 
-router.post('/', validateBody(contactSchema), ctrlWrapper(createContactsController));
-router.patch('/:id', isValidId, validateBody(contactSchema), ctrlWrapper(patchContactController)); 
+router.post('/', upload.single('photo'), validateBody(contactSchema), ctrlWrapper(createContactsController));
+router.patch('/:id', upload.single('photo'), isValidId, validateBody(contactSchema), ctrlWrapper(patchContactController)); 
 router.delete('/:id', isValidId, ctrlWrapper(deleteContactsIdController)); 
 
 export default router;

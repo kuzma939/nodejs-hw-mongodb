@@ -6,10 +6,12 @@ import router from './routers/index.js';
 import cookieParser from 'cookie-parser';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import { UPLOAD_DIR } from './constants/index.js';
 dotenv.config();
 
  
 const setupServer = () => {
+  app.use('/uploads', express.static(UPLOAD_DIR));
   const app = express();
   app.use(cors());
   app.use(cookieParser());
