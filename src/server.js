@@ -11,8 +11,9 @@ dotenv.config();
 
  
 const setupServer = () => {
-  app.use('/uploads', express.static(UPLOAD_DIR));
+  
   const app = express();
+  app.use('/uploads', express.static(UPLOAD_DIR));
   app.use(cors());
   app.use(cookieParser());
   app.use(
