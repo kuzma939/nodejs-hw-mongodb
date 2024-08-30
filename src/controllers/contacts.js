@@ -54,7 +54,7 @@ export const getContactsByIdController = async (req, res, next) => {
 };
 // eslint-disable-next-line no-unused-vars
 
-export const createContactController = async (req, res) => {
+export const createContactsController = async (req, res) => {
   const userId = req.user._id;
   const payload = { ...req.body, userId };
   const photo = req.file;
@@ -110,7 +110,7 @@ export const patchContactController = async (req, res, next) => {
     data: result,
   });
 };
-export const deleteContactController = async (req, res, next) => {
+export const deleteContactsIdController = async (req, res, next) => {
   const userId = req.user._id;
   const { id } = req.params;
 
