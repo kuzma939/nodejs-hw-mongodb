@@ -11,7 +11,7 @@ import { validateBody } from '../middlewares/validateBody.js';
 import { contactSchema } from '../schemas/contactSchema.js';
 import { isValidId } from '../middlewares/isValidId.js';
 import { authenticate } from '../middlewares/authenticate.js';
-import { upload } from '../middlewares/multer.js';
+import { upload } from '../middlewares/upload.js';
 const router = Router();
 router.use(authenticate);
 
