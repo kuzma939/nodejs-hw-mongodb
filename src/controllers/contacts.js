@@ -2,46 +2,51 @@ import mongoose from 'mongoose';
 import createHttpError from 'http-errors';
 import { getAllContacts, getContactsById, createContacts, deleteContacts, updateContact } from '../services/contacts.js';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
-import { parseSortParams } from '../utils/parseSortParams.js'
+import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
 import { contactSchema } from '../schemas/contactSchema.js';
 import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 import { env } from '../utils/env.js';
+
+// Контролер для отримання всіх контактів
 // eslint-disable-next-line no-unused-vars
 export const getContactsAllController = async (req, res, next) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
   const filter = parseFilterParams(req.query);
-    const contacts = await getAllContacts({
-      userId: req.user._id,
-      page,
-  perPage,
-  sortOrder,
-  sortBy,
-  filter,
 
-    });
-    
-    res.json({
-      status: 200,
-      message: 'Successfully found contacts!',
-      data: contacts,
-    });
-  
+  const contacts = await getAllContacts({
+    userId: req.user._id,
+    page,
+    perPage,
+    sortOrder,
+    sortBy,
+    filter,
+  });
+
+  res.json({
+    status: 200,
+    message: 'Successfully found contacts!',
+    data: contacts,
+  });
 };
-// eslint-disable-next-line no-unused-vars
+
+// Контролер для отримання контакту за ID
 export const getContactsByIdController = async (req, res, next) => {
   try {
-  const { id } = req.params;
-  const { userId } = req.user._id;
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return next(createHttpError(400, 'Invalid contact ID'));
-  }  
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(createHttpError(400, 'Invalid contact ID'));
+    }
+
     const contact = await getContactsById(id, userId);
     if (!contact) {
-      throw createHttpError(404, 'Contact no found');
+      throw createHttpError(404, 'Contact not found');
     }
+
     res.json({
       status: 200,
       message: `Successfully found contact with id ${id}!`,
@@ -49,37 +54,44 @@ export const getContactsByIdController = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
-    
   }
 };
-// eslint-disable-next-line no-unused-vars
 
-export const createContactsController = async (req, res) => {
-  const userId = req.user._id;
-  const payload = { ...req.body, userId };
-  const photo = req.file;
-  let photoUrl;
-  if (photo) {
-    if (env('ENABLE_CLOUDINARY') === 'true') {
-      photoUrl = await saveFileToCloudinary(photo);
-    } else {
-      photoUrl = await saveFileToUploadDir(photo);
+// Контролер для створення контакту
+export const createContactsController = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const payload = { ...req.body, userId };
+    const photo = req.file;
+    let photoUrl;
+
+    if (photo) {
+      if (env('ENABLE_CLOUDINARY') === 'true') {
+        photoUrl = await saveFileToCloudinary(photo);
+      } else {
+        photoUrl = await saveFileToUploadDir(photo);
+      }
+      payload.photo = photoUrl;
     }
-    payload.photo = photoUrl;
+
+    // Валідація тіла запиту
+    const { error } = contactSchema.validate(payload); // Перевіряємо повний payload
+    if (error) {
+      throw createHttpError(400, error.details[0].message);
+    }
+
+    const contact = await createContacts(payload, userId);
+    res.status(201).json({
+      status: 201,
+      message: 'Successfully created a contact!',
+      data: contact,
+    });
+  } catch (error) {
+    next(error);
   }
-// Валідація тіла запиту
-const { error } = contactSchema.validate(req.body);
-if (error) {
-  throw createHttpError(400, error.details[0].message);
-}
- const contact = await createContacts(payload, userId);
- res.status(201).json({
-   status: 201,
-   message: 'Successfully created a contact!',
-   data: contact,
- });
- 
 };
+
+// Контролер для оновлення контакту
 export const patchContactController = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -87,10 +99,8 @@ export const patchContactController = async (req, res, next) => {
     const photo = req.file;
     let photoUrl;
 
-    // Логування для перевірки наявності файлу
     console.log('Uploaded photo:', photo);
 
-    // Завантаження фото, якщо воно є в запиті
     if (photo) {
       if (env('ENABLE_CLOUDINARY') === 'true') {
         console.log('Saving to Cloudinary...');
@@ -106,6 +116,10 @@ export const patchContactController = async (req, res, next) => {
       ...req.body,
       photo: photoUrl || req.body.photo,
     };
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(createHttpError(400, 'Invalid contact ID'));
+    }
 
     const result = await updateContact(id, userId, updatedContactData);
 
@@ -123,14 +137,25 @@ export const patchContactController = async (req, res, next) => {
     next(err);
   }
 };
-export const deleteContactsIdController = async (req, res, next) => {
-  const userId = req.user._id;
-  const { id } = req.params;
 
-  const contact = await deleteContacts(id, userId);
-  if (!contact) {
-    next(createHttpError(404, 'Contacts not found'));
-    return;
+// Контролер для видалення контакту
+export const deleteContactsIdController = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(createHttpError(400, 'Invalid contact ID'));
+    }
+
+    const contact = await deleteContacts(id, userId);
+    if (!contact) {
+      return next(createHttpError(404, 'Contact not found'));
+    }
+
+    res.status(204).send();
+  } catch (error) {
+    next(error);
   }
-  res.status(204).send();
 };
+
