@@ -4,10 +4,17 @@ import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from '../constants/index.js';
 import { env } from './env.js';
 
 export const saveFileToUploadDir = async (file) => {
-  await fs.rename(
-    path.join(TEMP_UPLOAD_DIR, file.filename),
-    path.join(UPLOAD_DIR, file.filename),
-  );
-
-  return `${env('APP_DOMAIN')}/uploads/${file.filename}`;
+  try {
+    console.log('Moving file to local upload directory:', file.filename);
+    await fs.rename(
+      path.join(TEMP_UPLOAD_DIR, file.filename),
+      path.join(UPLOAD_DIR, file.filename),
+    );
+    const fileUrl = `${env('APP_DOMAIN')}/uploads/${file.filename}`;
+    console.log('File saved to local directory:', fileUrl);
+    return fileUrl;
+  } catch (error) {
+    console.error('Error saving to local directory:', error);
+    throw error;
+  }
 };
