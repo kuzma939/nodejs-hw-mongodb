@@ -54,6 +54,7 @@ const createSession = () => {
     refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
   };
 };
+
 export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
   const session = await SessionsCollection.findOne({
     _id: sessionId,
@@ -63,33 +64,23 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
   if (!session) {
     throw createHttpError(401, 'Session not found');
   }
-
   const isSessionTokenExpired =
-    new Date() > new Date(session.refreshTokenValidUntil);
+  new Date() > new Date(session.refreshTokenValidUntil);
 
-  if (isSessionTokenExpired) {
-    await SessionsCollection.deleteOne({ _id: sessionId });
-    throw createHttpError(401, 'Session token expired');
-  }
-
-  // Перевірка наявності session.userId
-  if (!session.userId) {
-    throw createHttpError(500, 'Session user ID not found');
-  }
-
-  const newSession = createSession();
-
-  // Видаляємо тільки після успішного створення нової сесії
-  await SessionsCollection.create({
-    userId: session.userId,
-    ...newSession,
-  });
-
+if (isSessionTokenExpired) {
   await SessionsCollection.deleteOne({ _id: sessionId });
+  throw createHttpError(401, 'Session token expired');
+}
 
-  // Повертаємо відповідь без поля userId
-  return {
-    accessToken: newSession.accessToken,
-    refreshToken: newSession.refreshToken,
-  };
+const newSession = createSession();
+
+// Видаляємо тільки після успішного створення нової сесії
+await SessionsCollection.create({
+  userId: session.userId,
+  ...newSession,
+});
+
+await SessionsCollection.deleteOne({ _id: sessionId });
+
+return newSession;
 };
