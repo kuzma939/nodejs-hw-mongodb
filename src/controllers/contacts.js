@@ -4,7 +4,6 @@ import { getAllContacts, getContactsById, createContacts, deleteContacts, update
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
-import { contactSchema } from '../schemas/contactSchema.js';
 import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 import { env } from '../utils/env.js';
@@ -74,12 +73,6 @@ export const createContactsController = async (req, res, next) => {
       payload.photo = photoUrl;
     }
 
-    // Валідація тіла запиту
-    const { error } = contactSchema.validate(payload); // Перевіряємо повний payload
-    if (error) {
-      throw createHttpError(400, error.details[0].message);
-    }
-
     const contact = await createContacts(payload, userId);
     res.status(201).json({
       status: 201,
@@ -111,22 +104,17 @@ export const patchContactController = async (req, res, next) => {
       }
       console.log('Photo URL:', photoUrl);
     }
-
-    const updatedContactData = {
+    
+    const result = await updateContact(id,userId,{
       ...req.body,
-      photo: photoUrl || req.body.photo,
-    };
-
+      photo: photoUrl
+    });
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return next(createHttpError(400, 'Invalid contact ID'));
     }
-
-    const result = await updateContact(id, userId, updatedContactData);
-
     if (!result) {
       throw createHttpError(404, 'Contact not found');
     }
-
     res.json({
       status: 200,
       message: 'Successfully patched a contact!',

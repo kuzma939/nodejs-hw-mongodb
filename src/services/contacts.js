@@ -56,24 +56,16 @@ export const createContacts = async (payload) => {
   const contact = await ContactsCollection.create(payload);
   return contact;
 };
-
-export const updateContact = async (id, payload, userId, options = {}) => {
-  
+export const updateContact = async (id,  userId, payload ) => {
+  console.log("данныу", payload)
   const opaResult = await ContactsCollection.findOneAndUpdate(
-    { _id: id, userId },
-    { $set: payload },
-    
-    { new: true, ...options }
+    { _id: id, userId,  }, // Условия поиска документа
+    payload, // Данные для обновления
+    {
+      new: true, // Возвращает обновленный документ
+    }
   );
-
-  if (!opaResult) {
-    return null;
-  }
-
-  return {
-    contact: opaResult,
-    isNew: Boolean(options?.upsert),
-  };
+  return opaResult;
 };
 export const deleteContacts = async (id, userId) => {
   const contact = await ContactsCollection.findOneAndDelete({
