@@ -1,20 +1,17 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
-import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from '../constants/index.js';
-import { env } from './env.js';
 
-export const saveFileToUploadDir = async (file) => {
-  try {
-    console.log('Moving file to local upload directory:', file.filename);
-    await fs.rename(
-      path.join(TEMP_UPLOAD_DIR, file.filename),
-      path.join(UPLOAD_DIR, file.filename),
-    );
-    const fileUrl = `${env('APP_DOMAIN')}/uploads/${file.filename}`;
-    console.log('File saved to local directory:', fileUrl);
-    return fileUrl;
-  } catch (error) {
-    console.error('Error saving to local directory:', error);
-    throw error;
-  }
+import fs from 'node:fs/promises';
+import cloudinary from 'cloudinary';
+import { env } from './env.js';
+import { CLOUDINARY } from '../constants/index.js';
+
+cloudinary.v2.config({
+  secure: true,
+  cloud_name: env(CLOUDINARY.CLOUD_NAME),
+  api_key: env(CLOUDINARY.API_KEY),
+  api_secret: env(CLOUDINARY.API_SECRET),
+});
+export const saveFileToCloudinary = async (file) => {
+  const response = await cloudinary.v2.uploader.upload(file.path);
+  await fs.unlink(file.path);
+  return response.secure_url;
 };
