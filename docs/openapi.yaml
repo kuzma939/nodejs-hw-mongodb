@@ -10,12 +10,12 @@ info:
 tags:
   - name: Contacts
     description: Operations about contacts.
-  - name: Authentication
-    description: Authentication operations.
+  - name: Auth
+    description: Auth operations.
 
 servers:
   - url: http://localhost:3000
-  - url: 
+  - url: https://nodejs-hw-mongodb-3-ujb9.onrender.com
 
 paths:
   /contacts:
