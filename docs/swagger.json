@@ -23,8 +23,8 @@
       "description": "Operations about contacts."
     },
     {
-      "name": "Authentication",
-      "description": "Authentication operations."
+      "name": "Auth",
+      "description": "Auth operations."
     }
   ],
   "paths": {
